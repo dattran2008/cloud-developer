@@ -1,4 +1,4 @@
 *** Link to the endpoint URL for a running elastic beanstalk deployment ***
 
 
-http://udagram-dat-dev-dev.us-east-1.elasticbeanstalk.com/
+[endpoint URL](http://udagram-dat-dev-dev.us-east-1.elasticbeanstalk.com/)
