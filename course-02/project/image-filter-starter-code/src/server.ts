@@ -1,4 +1,5 @@
 import express from "express";
+import { Request, Response, NextFunction } from "express";
 import bodyParser from "body-parser";
 import { filterImageFromURL, deleteLocalFiles } from "./util/util";
 
@@ -27,25 +28,34 @@ import { filterImageFromURL, deleteLocalFiles } from "./util/util";
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
-  app.get("/filteredimage", async (req, res) => {
-    const regexPattern =
-      /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*.*(jpg|png)$)/g;
-    const { image_url } = req.query;
-    const isValid = image_url.match(regexPattern);
+  app.get(
+    "/filteredimage",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const regexPattern =
+          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*.*(jpg|png)$)/g;
+        const { image_url }: { image_url: string } = req.query;
+        const isValid: Array<string> = image_url.match(regexPattern);
 
-    if (isValid === null) {
-      return res.status(400).send("Your URL is invalid, please try another");
-    }
+        if (isValid === null) {
+          return res
+            .status(400)
+            .send("Your URL is invalid, please try another");
+        }
 
-    const filteredImage = await filterImageFromURL(image_url);
-    if (filteredImage) {
-      res.on("finish", function () {
-        deleteLocalFiles([filteredImage]);
-      });
-      return res.status(200).sendFile(`${filteredImage}`);
+        const filteredImage: string = await filterImageFromURL(image_url);
+        if (filteredImage) {
+          res.on("finish", function () {
+            deleteLocalFiles([filteredImage]);
+          });
+          return res.status(200).sendFile(`${filteredImage}`);
+        }
+        return res.status(400).send("Error, image was not found!");
+      } catch (error) {
+        return next(error);
+      }
     }
-    return res.status(400).send("Error, image was not found!");
-  });
+  );
 
   //! END @TODO1
 
