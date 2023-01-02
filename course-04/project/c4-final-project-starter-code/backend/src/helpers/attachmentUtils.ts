@@ -19,7 +19,7 @@ export class AttachmentUtils {
     userId: string,
     url: string
   ): Promise<string> {
-    logger.info('Update attachment url')
+    logger.info('Update attachment url: ')
 
     await this.docClient
       .update({
