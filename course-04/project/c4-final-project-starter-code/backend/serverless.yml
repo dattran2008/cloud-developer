@@ -135,11 +135,11 @@ functions:
           - s3:PutObject
           - s3:GetObject
           - '*'
-        Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*
+        Resource: !GetAtt AttachmentsBucket.Arn
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
-        Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*
+        Resource: !GetAtt TodosTable.Arn
 
 resources:
   Resources:
