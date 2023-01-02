@@ -7,6 +7,8 @@ plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
   - serverless-plugin-tracing
+  - serverless-reqvalidator-plugin
+  - serverless-aws-documentation
 
 provider:
   name: aws
@@ -40,6 +42,20 @@ provider:
             - xray:PutTraceSegments
           Resource: "*"
 
+custom:
+  documentation:
+    api:
+      info:
+        version: '1.0.0'
+        title: serverless-api
+        description: serverless-api
+    models:
+      - name: CreateTodoRequest
+        contentType: "application/json"
+        schema: ${file(models/create-todo-model.json)}
+      - name: UpdateTodoRequest
+        contentType: "application/json"
+        schema: ${file(models/update-todo-model.json)}
 
 functions:
 
@@ -77,9 +93,12 @@ functions:
           path: todos
           cors: true
           authorizer: Auth
-          request:
-            schemas:
-              application/json: ${file(models/create-todo-model.json)}
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: "Create a new todo item"
+            description: "Create a new todo item"
+            requestModels:
+              "application/json": CreateTodoRequest
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -99,6 +118,12 @@ functions:
           method: patch
           path: todos/{todoId}
           cors: true
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: "Update existing todo item"
+            description: "Update existing todo item"
+            requestModels:
+              "application/json": UpdateTodoRequest
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -143,6 +168,15 @@ functions:
 
 resources:
   Resources:
+
+    RequestBodyValidator:
+      Type: AWS::ApiGateway::RequestValidator
+      Properties:
+        Name: 'request-body-validator'
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
     # Add necessary AWS resources. You will need at least the following AWS resources
     # TODO: Fill the properties
     # Feel free to change the names as you like. 
